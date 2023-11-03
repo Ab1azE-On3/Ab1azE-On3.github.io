@@ -28,19 +28,19 @@
 <meta property="og:site_name" content="On3&#39;s blog">
 <meta property="og:description" content="exit_hook除了free_hook，malloc_hook，还有一个exit_hook可以利用。特别是在高版本没有前两个hook函数之后存在getshell的新方法。 #include&lt;stdio.h&gt;  void main() &amp;#123;         printf(&quot;bhxdn&quot;);         exit(0); &amp;#125;  进入exit函数之">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://ab1aze-on3.github.io/.io//image-20230912144708753.png">
-<meta property="og:image" content="https://ab1aze-on3.github.io/.io//image-20230912144853856.png">
-<meta property="og:image" content="https://ab1aze-on3.github.io/.io//image-20230912145524640.png">
-<meta property="og:image" content="https://ab1aze-on3.github.io/.io//image-20230912145550577.png">
-<meta property="og:image" content="https://ab1aze-on3.github.io/.io//image-20230912150415068.png">
-<meta property="og:image" content="https://ab1aze-on3.github.io/.io//image-20230912151626736.png">
-<meta property="og:image" content="https://ab1aze-on3.github.io/.io//image-20230912223423620-1699002130940-8.png">
-<meta property="og:image" content="https://ab1aze-on3.github.io/.io//image-20230912223442918-1699002143925-11.png">
+<meta property="og:image" content="https://ab1aze-on3.github.io/2023/11/03/exit_hook/image-20230912144708753.png">
+<meta property="og:image" content="https://ab1aze-on3.github.io/2023/11/03/exit_hook/image-20230912144853856.png">
+<meta property="og:image" content="https://ab1aze-on3.github.io/2023/11/03/exit_hook/image-20230912145524640.png">
+<meta property="og:image" content="https://ab1aze-on3.github.io/2023/11/03/exit_hook/image-20230912145550577.png">
+<meta property="og:image" content="https://ab1aze-on3.github.io/2023/11/03/exit_hook/image-20230912150415068.png">
+<meta property="og:image" content="https://ab1aze-on3.github.io/2023/11/03/exit_hook/image-20230912151626736.png">
+<meta property="og:image" content="https://ab1aze-on3.github.io/2023/11/03/exit_hook/image-20230912223423620-1699002130940-8.png">
+<meta property="og:image" content="https://ab1aze-on3.github.io/2023/11/03/exit_hook/image-20230912223442918-1699002143925-11.png">
 <meta property="article:published_time" content="2023-11-03T09:03:53.445Z">
 <meta property="article:modified_time" content="2023-11-03T09:16:05.151Z">
 <meta property="article:author" content="On3">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://ab1aze-on3.github.io/.io//image-20230912144708753.png">
+<meta name="twitter:image" content="https://ab1aze-on3.github.io/2023/11/03/exit_hook/image-20230912144708753.png">
 
 
 <link rel="canonical" href="https://ab1aze-on3.github.io/2023/11/03/exit_hook/">
@@ -270,9 +270,9 @@ void main()
 &#125;
 </code></pre>
 <p>进入exit函数之后，call了_run_exit_handlers。</p>
-<p><img src="/.io//image-20230912144708753.png" alt="image-20230912144708753"></p>
+<p><img src="/2023/11/03/exit_hook/image-20230912144708753.png" alt="image-20230912144708753"></p>
 <p>后再_run_exit_handlers中call了 _dl_fini</p>
-<p><img src="/.io//image-20230912144853856.png" alt="image-20230912144853856"></p>
+<p><img src="/2023/11/03/exit_hook/image-20230912144853856.png" alt="image-20230912144853856"></p>
 <p>在关键源码中</p>
 <pre><code class="c"> 1 #ifdef SHARED
  2   int do_audit = 0;
@@ -296,19 +296,19 @@ void main()
 <p>call了 _rtld_lock_unlock_recursive和  __rtld_lock_lock_recursive两个函数，其实这两个函数都在 _rtld_global中存在，他会调用结构体中的函数，我们看看结构体</p>
 <pre><code>p _rtld_global
 </code></pre>
-<p><img src="/.io//image-20230912145524640.png" alt="image-20230912145524640"></p>
-<p><img src="/.io//image-20230912145550577.png" alt="image-20230912145550577"></p>
+<p><img src="/2023/11/03/exit_hook/image-20230912145524640.png" alt="image-20230912145524640"></p>
+<p><img src="/2023/11/03/exit_hook/image-20230912145550577.png" alt="image-20230912145550577"></p>
 <p>这样，我们只要将其中一个存的内容掉换成one_gadgets，这是一种getshell的方法，继续看汇编。</p>
 <p>看下面汇编，有一个将内容存入rdi的情况，这里就是 _rtld_global._dl_load_lock.mutex.__size的地址。也就是传的参数，这样我们也可以用system(“&#x2F;bin&#x2F;sh”)来做。</p>
-<p><img src="/.io//image-20230912150415068.png" alt="image-20230912150415068"></p>
+<p><img src="/2023/11/03/exit_hook/image-20230912150415068.png" alt="image-20230912150415068"></p>
 <pre><code>set *0x7ffff7ffdf60 = 0x7ffff7a31420
 set *0x7ffff7ffd968 = 0x7ffff7b95d88
 </code></pre>
-<p><img src="/.io//image-20230912151626736.png" alt="image-20230912151626736"></p>
+<p><img src="/2023/11/03/exit_hook/image-20230912151626736.png" alt="image-20230912151626736"></p>
 <h2 id="ciscn-2019-n-7"><a href="#ciscn-2019-n-7" class="headerlink" title="ciscn_2019_n_7"></a>ciscn_2019_n_7</h2><p>程序逻辑很简单，然后主要就是练exit_hook</p>
 <p>add函数</p>
-<p><img src="/.io//image-20230912223423620-1699002130940-8.png" alt="image-20230912223423620"></p>
-<p>edit函数<img src="/.io//image-20230912223442918-1699002143925-11.png" alt="image-20230912223442918"></p>
+<p><img src="/2023/11/03/exit_hook/image-20230912223423620-1699002130940-8.png" alt="image-20230912223423620"></p>
+<p>edit函数<img src="/2023/11/03/exit_hook/image-20230912223442918-1699002143925-11.png" alt="image-20230912223442918"></p>
 <p>问题就在read中，两个函数中的read都会造成溢出到content，从而造成任意写漏洞，这样我们就可以先泄露出libc（输入666），然后通过libc找到rtld_global改其中_rtld_lock_unlock_recursive为one_gadget地址即可。</p>
 <pre><code class="python">from LibcSearcher import *
 from pwn import *
