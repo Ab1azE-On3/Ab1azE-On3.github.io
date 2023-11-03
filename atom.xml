@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>On3&#39;s blog</title>
+  
+  <subtitle>I wanna be a better people &amp; persist in dreams</subtitle>
+  <link href="https://ab1aze-on3.github.io/atom.xml" rel="self"/>
+  
+  <link href="https://ab1aze-on3.github.io/"/>
+  <updated>2023-11-03T09:16:05.151Z</updated>
+  <id>https://ab1aze-on3.github.io/</id>
+  
+  <author>
+    <name>On3</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title></title>
+    <link href="https://ab1aze-on3.github.io/2023/11/03/exit_hook/"/>
+    <id>https://ab1aze-on3.github.io/2023/11/03/exit_hook/</id>
+    <published>2023-11-03T09:03:53.445Z</published>
+    <updated>2023-11-03T09:16:05.151Z</updated>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;exit-hook&quot;&gt;&lt;a href=&quot;#exit-hook&quot; class=&quot;headerlink&quot; title=&quot;exit_hook&quot;&gt;&lt;/a&gt;exit_hook&lt;/h1&gt;&lt;p&gt;除了free_hook，malloc_hook，还有一个exit_hook可以利用。</summary>
+      
+    
+    
+    
+    
+  </entry>
+  
+</feed>
