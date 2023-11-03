@@ -6,7 +6,7 @@
   <link href="https://ab1aze-on3.github.io/atom.xml" rel="self"/>
   
   <link href="https://ab1aze-on3.github.io/"/>
-  <updated>2023-11-02T12:10:33.948Z</updated>
+  <updated>2023-09-12T14:39:45.504Z</updated>
   <id>https://ab1aze-on3.github.io/</id>
   
   <author>
@@ -17,16 +17,16 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>Hello World</title>
-    <link href="https://ab1aze-on3.github.io/2023/11/02/hello-world/"/>
-    <id>https://ab1aze-on3.github.io/2023/11/02/hello-world/</id>
-    <published>2023-11-02T12:14:44.120Z</published>
-    <updated>2023-11-02T12:10:33.948Z</updated>
+    <title></title>
+    <link href="https://ab1aze-on3.github.io/2023/11/03/exit_hook/"/>
+    <id>https://ab1aze-on3.github.io/2023/11/03/exit_hook/</id>
+    <published>2023-11-03T08:49:14.339Z</published>
+    <updated>2023-09-12T14:39:45.504Z</updated>
     
     
       
       
-    <summary type="html">&lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.io/docs/&quot;&gt;documentation&lt;/a&gt; for</summary>
+    <summary type="html">&lt;h1 id=&quot;exit-hook&quot;&gt;&lt;a href=&quot;#exit-hook&quot; class=&quot;headerlink&quot; title=&quot;exit_hook&quot;&gt;&lt;/a&gt;exit_hook&lt;/h1&gt;&lt;p&gt;除了free_hook，malloc_hook，还有一个exit_hook可以利用。</summary>
       
     
     

