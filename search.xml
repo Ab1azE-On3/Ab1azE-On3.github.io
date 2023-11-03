@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>[object Object]</title>
+    <title>exit_hook</title>
     <url>/2023/11/03/exit_hook/</url>
     <content><![CDATA[<h1 id="exit-hook"><a href="#exit-hook" class="headerlink" title="exit_hook"></a>exit_hook</h1><p>除了free_hook，malloc_hook，还有一个exit_hook可以利用。特别是在高版本没有前两个hook函数之后存在getshell的新方法。</p>
 <pre><code class="c">#include&lt;stdio.h&gt;
